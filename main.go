@@ -31,6 +31,22 @@ func EmbedReact(urlPrefix, buildDirectory string, em embed.FS) gin.HandlerFunc {
 	}
 }
 
+func CORSMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "*")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(200)
+			return
+		}
+
+		c.Next()
+	}
+}
+
 func main() {
 
 	gin.SetMode(gin.ReleaseMode)
@@ -39,6 +55,7 @@ func main() {
 	router.Use(gin.Recovery())
 	router.Use(gin.Logger())
 
+	router.Use(CORSMiddleware())
 	router.Use(EmbedReact("/", "build", app))
 
 	port := ":8000"
